@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cdiscount Marketplace · 中国卖家入驻申请</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    color: #1a1a2e;
+  }
+  .topbar {
+    background: #1B2A4A;
+    padding: 12px 0;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+  .topbar span { color: #F5A623; }
+  .header {
+    background: linear-gradient(135deg, #1B2A4A 0%, #2C3E6B 60%, #3D5291 100%);
+    color: white;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 250px; height: 250px;
+    background: rgba(245,166,35,0.1);
+    border-radius: 50%;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 30%;
+    width: 150px; height: 150px;
+    background: rgba(245,166,35,0.08);
+    border-radius: 50%;
+  }
+  .header-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 40px 35px;
+    position: relative;
+    z-index: 1;
+  }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .logo-text sub {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.6;
+    letter-spacing: 0;
+    vertical-align: baseline;
+    margin-left: 6px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .header p {
+    font-size: 15px;
+    opacity: 0.8;
+    line-height: 1.7;
+    max-width: 560px;
+  }
+  .header-badges {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .header-badges .badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 16px;
+    border-radius: 24px;
+    font-size: 13px;
+    backdrop-filter: blur(4px);
+  }
+  .diamond {
+    width: 18px; height: 18px;
+    background: #F5A623;
+    transform: rotate(45deg);
+    display: inline-block;
+    border-radius: 3px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .steps {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px 40px 0;
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+  .step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .step-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #e0e4ea;
+    color: #8a8fa3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 6px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .step.active .step-dot {
+    background: #1B2A4A;
+    color: white;
+  }
+  .step.done .step-dot {
+    background: #22c55e;
+    color: white;
+  }
+  .step-label {
+    font-size: 12px;
+    color: #8a8fa3;
+    font-weight: 500;
+  }
+  .step.active .step-label { color: #1B2A4A; font-weight: 600; }
+  .step.done .step-label { color: #22c55e; }
+  .steps-line {
+    position: absolute;
+    top: 36px;
+    left: 15%;
+    right: 15%;
+    height: 2px;
+    background: #e0e4ea;
+    z-index: 0;
+  }
+  .container {
+    max-width: 780px;
+    margin: 20px auto 40px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  .form-section {
+    display: none;
+    padding: 32px 40px 40px;
+    animation: fadeIn 0.3s ease;
+  }
+  .form-section.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-head {
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f0f2f5;
+  }
+  .section-head h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1B2A4A;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-head h2 .icon { font-size: 22px; }
+  .section-head p {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 6px;
+  }
+  .form-group { margin-bottom: 20px; }
+  .form-row { display: flex; gap: 16px; }
+  .form-row .form-group { flex: 1; }
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+  }
+  label .req { color: #ef4444; margin-left: 2px; }
+  label .hint { font-weight: 400; color: #9ca3af; font-size: 12px; margin-left: 4px; }
+  input, select, textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fafbfc;
+    color: #1a1a2e;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #1B2A4A;
+    box-shadow: 0 0 0 3px rgba(27,42,74,0.08);
+    background: white;
+  }
+  input::placeholder, textarea::placeholder { color: #b0b5c3; }
+  textarea { resize: vertical; min-height: 80px; }
+  select { cursor: pointer; appearance: auto; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 16px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 24px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    user-select: none;
+    background: white;
+  }
+  .chip:hover { border-color: #1B2A4A; background: #f8f9fc; }
+  .chip.selected {
+    border-color: #1B2A4A;
+    background: #1B2A4A;
+    color: white;
+  }
+  .chip input { display: none; }
+  .radio-group { display: flex; flex-wrap: wrap; gap: 10px; }
+  .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    flex: 1;
+    min-width: 140px;
+  }
+  .radio-item:hover { border-color: #1B2A4A; }
+  .radio-item.selected {
+    border-color: #1B2A4A;
+    background: #f0f3f9;
+  }
+  .radio-item input[type="radio"] { accent-color: #1B2A4A; }
+  .conditional { display: none; margin-top: 12px; }
+  .conditional.show { display: block; }
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 16px;
+  }
+  .btn {
+    padding: 13px 36px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-next {
+    background: #1B2A4A;
+    color: white;
+    margin-left: auto;
+  }
+  .btn-next:hover { background: #2C3E6B; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(27,42,74,0.25); }
+  .btn-prev {
+    background: white;
+    color: #1B2A4A;
+    border: 1.5px solid #d1d5db;
+  }
+  .btn-prev:hover { background: #f8f9fc; border-color: #1B2A4A; }
+  .btn-submit {
+    background: linear-gradient(135deg, #F5A623 0%, #E8850C 100%);
+    color: white;
+    padding: 14px 48px;
+    font-size: 16px;
+    margin-left: auto;
+  }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,166,35,0.35); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+  .field-error { border-color: #ef4444 !important; }
+  .error-text { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
+  .success-page {
+    display: none;
+    text-align: center;
+    padding: 80px 40px;
+  }
+  .success-page .check {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 40px;
+    color: white;
+  }
+  .success-page h2 { font-size: 24px; color: #1B2A4A; margin-bottom: 12px; }
+  .success-page p { color: #6b7280; line-height: 1.8; font-size: 15px; }
+  .footer {
+    max-width: 780px;
+    margin: 0 auto 40px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .footer a { color: #6b7280; text-decoration: none; }
+  .global-error {
+    display: none;
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    border: 1px solid #fecaca;
+  }
+  @media (max-width: 640px) {
+    .header-inner { padding: 28px 20px 24px; }
+    .header h1 { font-size: 22px; }
+    .steps { padding: 16px 20px 0; }
+    .form-section { padding: 24px 20px 32px; }
+    .form-row { flex-direction: column; gap: 0; }
+    .header-badges { gap: 8px; }
+    .radio-item { min-width: 100%; }
+    .btn { padding: 12px 24px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="diamond"></span> Cdiscount Marketplace <span>powered by Octopia</span> · 中国卖家招商通道
+</div>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-row">
+      <div class="logo-text">CDISCOUNT<sub>Marketplace</sub></div>
+    </div>
+    <h1>中国卖家入驻申请</h1>
+    <p>法国第一电商平台，覆盖法国80%网购人群，触达欧洲5国潜在消费者。填写以下信息，专属招商经理将在48小时内与您联系。</p>
+    <div class="header-badges">
+      <div class="badge">🇫🇷 法国市场</div>
+      <div class="badge">🇪🇺 欧洲5国</div>
+      <div class="badge">📦 海外仓FBC</div>
+      <div class="badge">🚀 0元开店</div>
+    </div>
+  </div>
+</div>
+<div class="steps">
+  <div class="steps-line"></div>
+  <div class="step active" data-step="1"><div class="step-dot">1</div><div class="step-label">公司信息</div></div>
+  <div class="step" data-step="2"><div class="step-dot">2</div><div class="step-label">销售与产品</div></div>
+  <div class="step" data-step="3"><div class="step-dot">3</div><div class="step-label">物流与服务</div></div>
+  <div class="step" data-step="4"><div class="step-dot">4</div><div class="step-label">提交申请</div></div>
+</div><div class="container">
+  <div class="success-page" id="successPage">
+    <div class="check">✓</div>
+    <h2>入驻申请已提交！</h2>
+    <p>感谢您的信任与申请<br>专属招商经理将在 <strong>48小时内</strong> 通过微信或电话与您联系<br>请留意来自 Cdiscount 的消息<br><br>如有紧急需求，请联系：weilin.bellina.hu@gmail.com</p>
+  </div>
+  <form id="sellerForm">
+    <div class="form-section active" data-section="1">
+      <div class="section-head">
+        <h2><span class="icon">🏢</span> 公司基本信息</h2>
+        <p>请填写贵公司的基本信息，以便我们与您建立联系</p>
+      </div>
+      <div class="global-error" id="error1"></div>
+      <div class="form-group">
+        <label>公司名称 <span class="req">*</span></label>
+        <input type="text" name="company_name" placeholder="填写公司全名" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>联系人 <span class="req">*</span></label>
+          <input type="text" name="contact_name" placeholder="主要联系人姓名" required>
+        </div>
+        <div class="form-group">
+          <label>职位 <span class="req">*</span></label>
+          <input type="text" name="contact_title" placeholder="联系人职位或角色">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>手机 / 微信 <span class="req">*</span></label>
+          <input type="text" name="phone_wechat" placeholder="手机号码（同微信优先）" required>
+        </div>
+        <div class="form-group">
+          <label>邮箱 <span class="req">*</span></label>
+          <input type="email" name="email" placeholder="your@company.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>官网 <span class="hint">（如有）</span></label>
+        <input type="url" name="website" placeholder="https://www.example.com">
+      </div>
+      <div class="form-group">
+        <label>常用沟通方式 <span class="req">*</span></label>
+        <div class="chip-group" id="commGroup">
+          <label class="chip"><input type="checkbox" name="comm_method" value="微信"> 微信</label>
+          <label class="chip"><input type="checkbox" name="comm_method" value="电话"> 电话</label>
+          <label class="chip"><input type="checkbox" name="comm_method" value="邮件"> 邮件</label>
+          <label class="chip"><input type="checkbox" name="comm_method" value="其他"> 其他</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>跨境电商经验 <span class="req">*</span></label>
+        <select name="experience_years" required>
+          <option value="">请选择从业年限</option>
+          <option value="尚未开始">尚未开始，计划入行</option>
+          <option value="1年以内">1年以内</option>
+          <option value="1-3年">1-3年</option>
+          <option value="3-5年">3-5年</option>
+          <option value="5-10年">5-10年</option>
+          <option value="10年以上">10年以上</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>是否已有 Cdiscount 店铺？</label>
+        <div class="radio-group" id="hasStoreGroup">
+          <label class="radio-item"><input type="radio" name="has_cdiscount_store" value="是"> 是，已有店铺</label>
+          <label class="radio-item"><input type="radio" name="has_cdiscount_store" value="否" checked> 否，新卖家</label>
+        </div>
+        <div class="conditional" id="storeIdField">
+          <label>请填写您的 Cdiscount 店铺编号 <span class="hint">（Seller ID）</span></label>
+          <input type="text" name="cdiscount_store_id" placeholder="例：SEL-123456 或卖家后台显示的编号">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-next" onclick="goStep(2)">下一步 →</button>
+      </div>
+    </div>
+    <div class="form-section" data-section="2">
+      <div class="section-head">
+        <h2><span class="icon">📦</span> 销售与产品信息</h2>
+        <p>帮助我们了解您的业务规模和产品定位</p>
+      </div>
+      <div class="global-error" id="error2"></div>
+      <div class="form-group">
+        <label>目前销售平台 <span class="req">*</span> <span class="hint">（可多选）</span></label>
+        <div class="chip-group" id="platformGroup">
+          <label class="chip"><input type="checkbox" name="platforms" value="亚马逊"> 亚马逊</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="eBay"> eBay</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="速卖通"> 速卖通</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="Lazada"> Lazada</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="Shopee"> Shopee</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="Cdiscount"> Cdiscount</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="Temu"> Temu</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="SHEIN"> SHEIN</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="独立站"> 独立站</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>年销售额（万元人民币）<span class="req">*</span></label>
+          <select name="annual_revenue" required>
+            <option value="">请选择</option>
+            <option value="50万以下">50万以下</option>
+            <option value="50-200万">50-200万</option>
+            <option value="200-500万">200-500万</option>
+            <option value="500-1000万">500-1000万</option>
+            <option value="1000-5000万">1000-5000万</option>
+            <option value="5000万以上">5000万以上</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>发展策略</label>
+          <select name="strategy">
+            <option value="">请选择</option>
+            <option value="拓展新平台">拓展新平台渠道</option>
+            <option value="深耕欧洲市场">深耕欧洲市场</option>
+            <option value="品牌出海">品牌出海</option>
+            <option value="清库存">清库存/尾货处理</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>产品类目 <span class="req">*</span> <span class="hint">（可多选）</span></label>
+        <div class="chip-group" id="categoryGroup">
+          <label class="chip"><input type="checkbox" name="categories" value="家居"> 家居</label>
+          <label class="chip"><input type="checkbox" name="categories" value="电子"> 电子</label>
+          <label class="chip"><input type="checkbox" name="categories" value="服饰"> 服饰</label>
+          <label class="chip"><input type="checkbox" name="categories" value="母婴"> 母婴</label>
+          <label class="chip"><input type="checkbox" name="categories" value="美妆"> 美妆</label>
+          <label class="chip"><input type="checkbox" name="categories" value="家电"> 家电</label>
+          <label class="chip"><input type="checkbox" name="categories" value="运动户外"> 运动户外</label>
+          <label class="chip"><input type="checkbox" name="categories" value="汽车配件"> 汽车配件</label>
+          <label class="chip"><input type="checkbox" name="categories" value="玩具"> 玩具</label>
+          <label class="chip"><input type="checkbox" name="categories" value="工具五金"> 工具五金</label>
+          <label class="chip"><input type="checkbox" name="categories" value="花园园艺"> 花园园艺</label>
+          <label class="chip"><input type="checkbox" name="categories" value="箱包"> 箱包</label>
+          <label class="chip"><input type="checkbox" name="categories" value="其他"> 其他</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>SKU 数量</label>
+          <select name="sku_count">
+            <option value="">请选择</option>
+            <option value="100以内">100 以内</option>
+            <option value="100-500">100 - 500</option>
+            <option value="500-2000">500 - 2000</option>
+            <option value="2000-10000">2000 - 10000</option>
+            <option value="10000+">10000+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>定价策略</label>
+          <select name="pricing_strategy">
+            <option value="">请选择</option>
+            <option value="低价走量">低价走量</option>
+            <option value="中端性价比">中端性价比</option>
+            <option value="高端品牌">高端品牌</option>
+            <option value="灵活定价">灵活定价</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-prev" onclick="goStep(1)">← 上一步</button>
+        <button type="button" class="btn btn-next" onclick="goStep(3)">下一步 →</button>
+      </div>
+    </div>    <div class="form-section" data-section="3">
+      <div class="section-head">
+        <h2><span class="icon">🚚</span> 物流仓储与服务</h2>
+        <p>了解您的物流情况，为您推荐最合适的入驻方案</p>
+      </div>
+      <div class="global-error" id="error3"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>主要仓库位置</label>
+          <input type="text" name="warehouse_location" placeholder="例：深圳、义乌、广州">
+        </div>
+        <div class="form-group">
+          <label>合作物流商 <span class="hint">（如有）</span></label>
+          <input type="text" name="logistics_partner" placeholder="例：递四方、万邑通、燕文">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>是否有海外仓 <span class="req">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="overseas_warehouse" value="已布局"> 已布局</label>
+          <label class="radio-item"><input type="radio" name="overseas_warehouse" value="正筹备"> 正在筹备</label>
+          <label class="radio-item"><input type="radio" name="overseas_warehouse" value="暂无"> 暂无</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>常用配送方式 <span class="hint">（可多选）</span></label>
+        <div class="chip-group">
+          <label class="chip"><input type="checkbox" name="shipping_methods" value="官方物流"> 官方物流</label>
+          <label class="chip"><input type="checkbox" name="shipping_methods" value="第三方物流"> 第三方物流</label>
+          <label class="chip"><input type="checkbox" name="shipping_methods" value="海外仓转运"> 海外仓转运</label>
+          <label class="chip"><input type="checkbox" name="shipping_methods" value="直邮"> 直邮</label>
+          <label class="chip"><input type="checkbox" name="shipping_methods" value="自发货"> 自发货</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>对接方式偏好</label>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="onboarding_pref" value="平台直对接"> 平台直对接</label>
+          <label class="radio-item"><input type="radio" name="onboarding_pref" value="服务商辅助"> 服务商辅助</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>感兴趣的 Cdiscount 服务 <span class="hint">（可多选）</span></label>
+        <div class="chip-group">
+          <label class="chip"><input type="checkbox" name="interested_services" value="海外仓FBC"> 海外仓 FBC</label>
+          <label class="chip"><input type="checkbox" name="interested_services" value="欧洲多平台运营"> 欧洲多平台运营</label>
+          <label class="chip"><input type="checkbox" name="interested_services" value="广告推广"> 广告推广</label>
+          <label class="chip"><input type="checkbox" name="interested_services" value="专属运营对接"> 专属运营对接</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>计划入驻时间</label>
+          <select name="planned_time">
+            <option value="">请选择</option>
+            <option value="尽快">尽快入驻</option>
+            <option value="1个月内">1个月内</option>
+            <option value="1-3个月">1-3个月</option>
+            <option value="3个月以后">3个月以后</option>
+            <option value="仅了解">仅了解，暂不入驻</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-prev" onclick="goStep(2)">← 上一步</button>
+        <button type="button" class="btn btn-next" onclick="goStep(4)">下一步 →</button>
+      </div>
+    </div>
+    <div class="form-section" data-section="4">
+      <div class="section-head">
+        <h2><span class="icon">✅</span> 确认并提交</h2>
+        <p>请检查以下信息，确认无误后提交入驻申请</p>
+      </div>
+      <div class="global-error" id="error4"></div>
+      <div id="summaryContent" style="background:#f8f9fc; border-radius:10px; padding:24px; margin-bottom:20px; font-size:14px; line-height:2;"></div>
+      <div class="form-group">
+        <label>补充说明 <span class="hint">（品牌介绍、合作意向等）</span></label>
+        <textarea name="notes" placeholder="如有其他需要说明的信息，请在此填写..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-prev" onclick="goStep(3)">← 上一步</button>
+        <button type="submit" class="btn btn-submit" id="submitBtn">🚀 提交入驻申请</button>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="footer">
+  Cdiscount Marketplace · powered by Octopia<br>
+  法国领先电商平台 · 中国卖家招商<br>
+  <a href="mailto:weilin.bellina.hu@gmail.com">weilin.bellina.hu@gmail.com</a>
+</div>
+<script>
+  const N8N_WEBHOOK_URL = "https://你的N8N域名/webhook/cdiscount-seller-form";
+  let currentStep = 1;
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', function(e) {
+      if (e.target.tagName === 'INPUT') return;
+      const cb = this.querySelector('input');
+      cb.checked = !cb.checked;
+      this.classList.toggle('selected', cb.checked);
+    });
+    const cb = chip.querySelector('input');
+    if (cb) cb.addEventListener('change', function() {
+      chip.classList.toggle('selected', this.checked);
+    });
+  });
+  document.querySelectorAll('.radio-group').forEach(group => {
+    group.querySelectorAll('.radio-item').forEach(item => {
+      item.addEventListener('click', function() {
+        group.querySelectorAll('.radio-item').forEach(i => i.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input').checked = true;
+        const radio = this.querySelector('input');
+        if (radio.name === 'has_cdiscount_store') {
+          const show = radio.value === '是';
+          document.getElementById('storeIdField').classList.toggle('show', show);
+        }
+      });
+    });
+  });
+  function goStep(step) {
+    if (step > currentStep && !validateStep(currentStep)) return;
+    if (step === 4) buildSummary();
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.querySelector('[data-section="'+step+'"]').classList.add('active');
+    document.querySelectorAll('.step').forEach(s => {
+      const n = parseInt(s.dataset.step);
+      s.classList.remove('active', 'done');
+      if (n === step) s.classList.add('active');
+      else if (n < step) s.classList.add('done');
+    });
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function validateStep(step) {
+    const section = document.querySelector('[data-section="'+step+'"]');
+    const errorDiv = document.getElementById('error'+step);
+    if (errorDiv) errorDiv.style.display = 'none';
+    section.querySelectorAll('.field-error').forEach(f => f.classList.remove('field-error'));
+    if (step === 1) {
+      const required = ['company_name', 'contact_name', 'phone_wechat', 'email'];
+      for (const name of required) {
+        const input = section.querySelector('[name="'+name+'"]');
+        if (!input.value.trim()) {
+          input.classList.add('field-error');
+          input.focus();
+          errorDiv.textContent = '请填写所有带 * 的必填字段';
+          errorDiv.style.display = 'block';
+          return false;
+        }
+      }
+      const exp = section.querySelector('[name="experience_years"]');
+      if (!exp.value) { exp.classList.add('field-error'); errorDiv.textContent = '请选择跨境电商经验'; errorDiv.style.display = 'block'; return false; }
+      const comm = section.querySelectorAll('[name="comm_method"]:checked');
+      if (comm.length === 0) { errorDiv.textContent = '请选择至少一个常用沟通方式'; errorDiv.style.display = 'block'; return false; }
+    }
+    if (step === 2) {
+      const platforms = section.querySelectorAll('[name="platforms"]:checked');
+      if (platforms.length === 0) { errorDiv.textContent = '请选择至少一个销售平台'; errorDiv.style.display = 'block'; return false; }
+      const rev = section.querySelector('[name="annual_revenue"]');
+      if (!rev.value) { rev.classList.add('field-error'); errorDiv.textContent = '请选择年销售额'; errorDiv.style.display = 'block'; return false; }
+      const cats = section.querySelectorAll('[name="categories"]:checked');
+      if (cats.length === 0) { errorDiv.textContent = '请选择至少一个产品类目'; errorDiv.style.display = 'block'; return false; }
+    }
+    if (step === 3) {
+      const wh = section.querySelector('[name="overseas_warehouse"]:checked');
+      if (!wh) { errorDiv.textContent = '请选择是否有海外仓'; errorDiv.style.display = 'block'; return false; }
+    }
+    return true;
+  }
+  function getVal(name) { const el = document.querySelector('[name="'+name+'"]'); return el ? el.value.trim() : ''; }
+  function getChecked(name) { return Array.from(document.querySelectorAll('[name="'+name+'"]:checked')).map(c => c.value); }
+  function getRadio(name) { const el = document.querySelector('[name="'+name+'"]:checked'); return el ? el.value : ''; }
+  function buildSummary() {
+    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>手机/微信：'+getVal('phone_wechat')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+(getChecked('platforms').join('、')||'未选')+'<br>年销售额：'+getVal('annual_revenue')+'<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(getRadio('overseas_warehouse')||'未选')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
+    document.getElementById('summaryContent').innerHTML = html;
+  }
+  document.getElementById('sellerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const data = {
+      company_name: getVal('company_name'), contact_name: getVal('contact_name'), contact_title: getVal('contact_title'),
+      phone_wechat: getVal('phone_wechat'), email: getVal('email'), website: getVal('website'),
+      comm_method: getChecked('comm_method').join(', '), experience_years: getVal('experience_years'),
+      has_cdiscount_store: getRadio('has_cdiscount_store'), cdiscount_store_id: getVal('cdiscount_store_id'),
+      platforms: getChecked('platforms').join(', '), annual_revenue: getVal('annual_revenue'),
+      strategy: getVal('strategy'), categories: getChecked('categories').join(', '),
+      sku_count: getVal('sku_count'), pricing_strategy: getVal('pricing_strategy'),
+      warehouse_location: getVal('warehouse_location'), logistics_partner: getVal('logistics_partner'),
+      overseas_warehouse: getRadio('overseas_warehouse'), shipping_methods: getChecked('shipping_methods').join(', '),
+      onboarding_pref: getRadio('onboarding_pref'), interested_services: getChecked('interested_services').join(', '),
+      planned_time: getVal('planned_time'), notes: getVal('notes'),
+      submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v2'
+    };
+    btn.disabled = true; btn.textContent = '提交中...';
+    try {
+      const resp = await fetch(N8N_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      if (resp.ok) { showSuccess(); } else { throw new Error('Server: ' + resp.status); }
+    } catch (err) { console.log('Webhook error:', err); console.log('Data:', JSON.stringify(data, null, 2)); showSuccess(); }
+    finally { btn.disabled = false; btn.textContent = '🚀 提交入驻申请'; }
+  });
+  function showSuccess() {
+    document.getElementById('sellerForm').style.display = 'none';
+    document.getElementById('successPage').style.display = 'block';
+    document.querySelector('.steps').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
