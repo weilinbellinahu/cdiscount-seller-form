@@ -639,29 +639,28 @@
 <script>
   const N8N_WEBHOOK_URL = "https://n8n.srv1253663.hstgr.cloud/webhook/cdiscount-seller-form";
   let currentStep = 1;
+  // Chip 视觉同步：让浏览器原生的 label→input 切换工作，我们只听 change 事件更新视觉
   document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', function(e) {
-      if (e.target.tagName === 'INPUT') return;
-      const cb = this.querySelector('input');
-      cb.checked = !cb.checked;
-      this.classList.toggle('selected', cb.checked);
-    });
     const cb = chip.querySelector('input');
-    if (cb) cb.addEventListener('change', function() {
-      chip.classList.toggle('selected', this.checked);
-    });
+    if (cb) {
+      // 初始化已勾选 chip 的视觉状态（如果有 default checked）
+      if (cb.checked) chip.classList.add('selected');
+      cb.addEventListener('change', function() {
+        chip.classList.toggle('selected', this.checked);
+      });
+    }
   });
   // Auto-tick comm chips as user types contact fields (UX v2: respects manual override)
   let commManuallyEdited = false;
-  document.querySelectorAll('#commGroup .chip').forEach(chip => {
-    chip.addEventListener('click', function() { commManuallyEdited = true; });
+  document.querySelectorAll('#commGroup input[name="comm_method"]').forEach(cb => {
+    cb.addEventListener('change', function() { commManuallyEdited = true; });
   });
   function autoTickChip(chipValue) {
     if (commManuallyEdited) return; // 用户已手动管理沟通方式 chip，不再自动勾选
-    const chip = document.querySelector('[name="comm_method"][value="'+chipValue+'"]');
-    if (chip && !chip.checked) {
-      chip.checked = true;
-      chip.closest('.chip').classList.add('selected');
+    const cb = document.querySelector('[name="comm_method"][value="'+chipValue+'"]');
+    if (cb && !cb.checked) {
+      cb.checked = true;
+      cb.closest('.chip').classList.add('selected');
     }
   }
   const phoneInput = document.querySelector('[name="phone_wechat"]');
