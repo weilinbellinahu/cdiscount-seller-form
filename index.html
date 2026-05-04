@@ -756,9 +756,18 @@
     const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>手机/微信：'+getVal('phone_wechat')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+(getChecked('platforms').join('、')||'未选')+'<br>年销售额：'+getVal('annual_revenue')+'<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(getRadio('overseas_warehouse')||'未选')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
     document.getElementById('summaryContent').innerHTML = html;
   }
-  document.getElementById('sellerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+  // ===== 提交逻辑（双保险版）=====
+  // 1. 同时绑定 form submit + button click，任何一个触发都能提交
+  // 2. 8 秒超时，避免 N8N 慢导致永远卡在「提交中」
+  // 3. 不管 N8N 成不成功都显示成功页（数据错误从控制台看）
+  // 4. 防止重复点击
+  let submitting = false;
+  async function submitFormData() {
+    if (submitting) return;
+    submitting = true;
     const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '提交中...';
     const data = {
       company_name: getVal('company_name'), contact_name: getVal('contact_name'), contact_title: getVal('contact_title'),
       phone_wechat: getVal('phone_wechat'), email: getVal('email'), website: getVal('website'),
@@ -773,12 +782,35 @@
       planned_time: getVal('planned_time'), notes: getVal('notes'),
       submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v2'
     };
-    btn.disabled = true; btn.textContent = '提交中...';
+    // 8 秒超时
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      const resp = await fetch(N8N_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      if (resp.ok) { showSuccess(); } else { throw new Error('Server: ' + resp.status); }
-    } catch (err) { console.log('Webhook error:', err); console.log('Data:', JSON.stringify(data, null, 2)); showSuccess(); }
-    finally { btn.disabled = false; btn.textContent = '🚀 提交入驻申请'; }
+      const resp = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      console.log('N8N 响应状态:', resp.status);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.log('提交异常:', err.message);
+      console.log('提交数据:', JSON.stringify(data, null, 2));
+    }
+    showSuccess();
+    submitting = false;
+  }
+  // 主：按钮点击
+  document.getElementById('submitBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    submitFormData();
+  });
+  // 备用：表单 submit（比如键盘 Enter 触发）
+  document.getElementById('sellerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitFormData();
   });
   function showSuccess() {
     document.getElementById('sellerForm').style.display = 'none';
