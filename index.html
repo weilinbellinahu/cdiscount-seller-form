@@ -651,8 +651,13 @@
       chip.classList.toggle('selected', this.checked);
     });
   });
-  // Auto-tick comm chips as user types contact fields (UX improvement)
+  // Auto-tick comm chips as user types contact fields (UX v2: respects manual override)
+  let commManuallyEdited = false;
+  document.querySelectorAll('#commGroup .chip').forEach(chip => {
+    chip.addEventListener('click', function() { commManuallyEdited = true; });
+  });
   function autoTickChip(chipValue) {
+    if (commManuallyEdited) return; // 用户已手动管理沟通方式 chip，不再自动勾选
     const chip = document.querySelector('[name="comm_method"][value="'+chipValue+'"]');
     if (chip && !chip.checked) {
       chip.checked = true;
@@ -714,9 +719,9 @@
       }
       const exp = section.querySelector('[name="experience_years"]');
       if (!exp.value) { exp.classList.add('field-error'); errorDiv.textContent = '请选择跨境电商经验'; errorDiv.style.display = 'block'; return false; }
-      // Auto-tick communication method chips based on filled contact fields (UX fix)
+      // Auto-tick communication method chips based on filled contact fields (only if user hasn't manually managed them)
       let comm = section.querySelectorAll('[name="comm_method"]:checked');
-      if (comm.length === 0) {
+      if (comm.length === 0 && !commManuallyEdited) {
         const phoneVal = section.querySelector('[name="phone_wechat"]').value.trim();
         const emailVal = section.querySelector('[name="email"]').value.trim();
         if (phoneVal) {
