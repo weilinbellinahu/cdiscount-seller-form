@@ -25,7 +25,7 @@
     background: linear-gradient(135deg, #1B2A4A 0%, #2C3E6B 60%, #3D5291 100%);
     color: white;
     padding: 0;
-    position: relative
+    position: relative;
     overflow: hidden;
   }
   .header::before {
@@ -421,7 +421,7 @@
         <input type="url" name="website" placeholder="https://www.example.com">
       </div>
       <div class="form-group">
-        <label>常用沟通方式 <span class="req">*</span></label>
+        <label>常用沟通方式 <span class="req">*</span> <span class="hint">（点击选择，可多选）</span></label>
         <div class="chip-group" id="commGroup">
           <label class="chip"><input type="checkbox" name="comm_method" value="微信"> 微信</label>
           <label class="chip"><input type="checkbox" name="comm_method" value="电话"> 电话</label>
@@ -651,6 +651,22 @@
       chip.classList.toggle('selected', this.checked);
     });
   });
+  // Auto-tick comm chips as user types contact fields (UX improvement)
+  function autoTickChip(chipValue) {
+    const chip = document.querySelector('[name="comm_method"][value="'+chipValue+'"]');
+    if (chip && !chip.checked) {
+      chip.checked = true;
+      chip.closest('.chip').classList.add('selected');
+    }
+  }
+  const phoneInput = document.querySelector('[name="phone_wechat"]');
+  if (phoneInput) phoneInput.addEventListener('input', function() {
+    if (this.value.trim()) autoTickChip('微信');
+  });
+  const emailInput = document.querySelector('[name="email"]');
+  if (emailInput) emailInput.addEventListener('input', function() {
+    if (this.value.trim()) autoTickChip('邮件');
+  });
   document.querySelectorAll('.radio-group').forEach(group => {
     group.querySelectorAll('.radio-item').forEach(item => {
       item.addEventListener('click', function() {
@@ -698,7 +714,21 @@
       }
       const exp = section.querySelector('[name="experience_years"]');
       if (!exp.value) { exp.classList.add('field-error'); errorDiv.textContent = '请选择跨境电商经验'; errorDiv.style.display = 'block'; return false; }
-      const comm = section.querySelectorAll('[name="comm_method"]:checked');
+      // Auto-tick communication method chips based on filled contact fields (UX fix)
+      let comm = section.querySelectorAll('[name="comm_method"]:checked');
+      if (comm.length === 0) {
+        const phoneVal = section.querySelector('[name="phone_wechat"]').value.trim();
+        const emailVal = section.querySelector('[name="email"]').value.trim();
+        if (phoneVal) {
+          const wechatChip = section.querySelector('[name="comm_method"][value="微信"]');
+          if (wechatChip) { wechatChip.checked = true; wechatChip.closest('.chip').classList.add('selected'); }
+        }
+        if (emailVal) {
+          const mailChip = section.querySelector('[name="comm_method"][value="邮件"]');
+          if (mailChip) { mailChip.checked = true; mailChip.closest('.chip').classList.add('selected'); }
+        }
+        comm = section.querySelectorAll('[name="comm_method"]:checked');
+      }
       if (comm.length === 0) { errorDiv.textContent = '请选择至少一个常用沟通方式'; errorDiv.style.display = 'block'; return false; }
     }
     if (step === 2) {
