@@ -396,6 +396,21 @@
         <label>公司名称 <span class="req">*</span></label>
         <input type="text" name="company_name" placeholder="填写公司全名" required>
       </div>
+      <div class="form-group">
+        <label>入驻 Cdiscount 店铺名称 <span class="req">*</span> <span class="hint">（您希望在 Cdiscount 上展示的店铺名）</span></label>
+        <input type="text" name="cd_store_name" placeholder="例：YourBrand Official Store" required>
+      </div>
+      <div class="form-group">
+        <label>是否是品牌方？ <span class="req">*</span></label>
+        <div class="radio-group" id="isBrandGroup">
+          <label class="radio-item"><input type="radio" name="is_brand" value="是"> 是，自有品牌</label>
+          <label class="radio-item"><input type="radio" name="is_brand" value="否"> 否，分销/代运营</label>
+        </div>
+        <div class="conditional" id="brandNameField">
+          <label>品牌名称 <span class="hint">（如有商标请注明）</span></label>
+          <input type="text" name="brand_name" placeholder="例：YourBrand（已注册商标 / 申请中）">
+        </div>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label>联系人 <span class="req">*</span></label>
@@ -474,20 +489,21 @@
           <label class="chip"><input type="checkbox" name="platforms" value="Temu"> Temu</label>
           <label class="chip"><input type="checkbox" name="platforms" value="SHEIN"> SHEIN</label>
           <label class="chip"><input type="checkbox" name="platforms" value="独立站"> 独立站</label>
+          <label class="chip"><input type="checkbox" name="platforms" value="其他"> 其他</label>
         </div>
+        <div class="conditional" id="platformsOtherField">
+          <label>其他平台名称 <span class="hint">（请填写具体平台）</span></label>
+          <input type="text" name="platforms_other" placeholder="例：Wayfair、Manomano、Otto">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>各平台店铺地址 <span class="hint">（每行一条，请附上店铺主页链接）</span></label>
+        <textarea name="platform_store_urls" placeholder="例：&#10;亚马逊：https://www.amazon.fr/sp?seller=...&#10;eBay：https://www.ebay.fr/usr/...&#10;独立站：https://www.yourbrand.com" rows="4"></textarea>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>年销售额（万元人民币）<span class="req">*</span></label>
-          <select name="annual_revenue" required>
-            <option value="">请选择</option>
-            <option value="50万以下">50万以下</option>
-            <option value="50-200万">50-200万</option>
-            <option value="200-500万">200-500万</option>
-            <option value="500-1000万">500-1000万</option>
-            <option value="1000-5000万">1000-5000万</option>
-            <option value="5000万以上">5000万以上</option>
-          </select>
+          <input type="text" name="annual_revenue" placeholder="例：500（即 500 万元）" required>
         </div>
         <div class="form-group">
           <label>发展策略</label>
@@ -522,14 +538,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>SKU 数量</label>
-          <select name="sku_count">
-            <option value="">请选择</option>
-            <option value="100以内">100 以内</option>
-            <option value="100-500">100 - 500</option>
-            <option value="500-2000">500 - 2000</option>
-            <option value="2000-10000">2000 - 10000</option>
-            <option value="10000+">10000+</option>
-          </select>
+          <input type="text" name="sku_count" placeholder="例：350">
         </div>
         <div class="form-group">
           <label>定价策略</label>
@@ -564,10 +573,26 @@
       </div>
       <div class="form-group">
         <label>是否有海外仓 <span class="req">*</span></label>
-        <div class="radio-group">
+        <div class="radio-group" id="warehouseGroup">
           <label class="radio-item"><input type="radio" name="overseas_warehouse" value="已布局"> 已布局</label>
           <label class="radio-item"><input type="radio" name="overseas_warehouse" value="正筹备"> 正在筹备</label>
           <label class="radio-item"><input type="radio" name="overseas_warehouse" value="暂无"> 暂无</label>
+        </div>
+        <div class="conditional" id="warehouseRegionsField">
+          <label>海外仓所在地区 <span class="hint">（可多选）</span></label>
+          <div class="chip-group" id="warehouseRegionsGroup">
+            <label class="chip"><input type="checkbox" name="warehouse_regions" value="德国"> 德国</label>
+            <label class="chip"><input type="checkbox" name="warehouse_regions" value="波兰"> 波兰</label>
+            <label class="chip"><input type="checkbox" name="warehouse_regions" value="法国"> 法国</label>
+            <label class="chip"><input type="checkbox" name="warehouse_regions" value="英国"> 英国</label>
+            <label class="chip"><input type="checkbox" name="warehouse_regions" value="西班牙"> 西班牙</label>
+            <label class="chip"><input type="checkbox" name="warehouse_regions" value="意大利"> 意大利</label>
+            <label class="chip"><input type="checkbox" name="warehouse_regions" value="其他"> 其他</label>
+          </div>
+          <div class="conditional" id="warehouseRegionsOtherField" style="margin-top:10px">
+            <label>其他地区 <span class="hint">（请填写具体国家或城市）</span></label>
+            <input type="text" name="warehouse_regions_other" placeholder="例：荷兰、捷克、美国洛杉矶">
+          </div>
         </div>
       </div>
       <div class="form-group">
@@ -682,7 +707,31 @@
           const show = radio.value === '是';
           document.getElementById('storeIdField').classList.toggle('show', show);
         }
+        if (radio.name === 'is_brand') {
+          const show = radio.value === '是';
+          document.getElementById('brandNameField').classList.toggle('show', show);
+        }
+        if (radio.name === 'overseas_warehouse') {
+          const show = radio.value === '已布局';
+          document.getElementById('warehouseRegionsField').classList.toggle('show', show);
+        }
       });
+    });
+  });
+  // 销售平台勾选「其他」展开自填输入框
+  document.querySelectorAll('#platformGroup input[name="platforms"]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      if (this.value === '其他') {
+        document.getElementById('platformsOtherField').classList.toggle('show', this.checked);
+      }
+    });
+  });
+  // 海外仓地区勾选「其他」展开自填输入框
+  document.querySelectorAll('#warehouseRegionsGroup input[name="warehouse_regions"]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      if (this.value === '其他') {
+        document.getElementById('warehouseRegionsOtherField').classList.toggle('show', this.checked);
+      }
     });
   });
   function goStep(step) {
@@ -705,7 +754,7 @@
     if (errorDiv) errorDiv.style.display = 'none';
     section.querySelectorAll('.field-error').forEach(f => f.classList.remove('field-error'));
     if (step === 1) {
-      const required = ['company_name', 'contact_name', 'phone_wechat', 'email'];
+      const required = ['company_name', 'cd_store_name', 'contact_name', 'phone_wechat', 'email'];
       for (const name of required) {
         const input = section.querySelector('[name="'+name+'"]');
         if (!input.value.trim()) {
@@ -716,6 +765,8 @@
           return false;
         }
       }
+      const isBrand = section.querySelector('[name="is_brand"]:checked');
+      if (!isBrand) { errorDiv.textContent = '请选择是否是品牌方'; errorDiv.style.display = 'block'; return false; }
       const exp = section.querySelector('[name="experience_years"]');
       if (!exp.value) { exp.classList.add('field-error'); errorDiv.textContent = '请选择跨境电商经验'; errorDiv.style.display = 'block'; return false; }
       // Auto-tick communication method chips based on filled contact fields (only if user hasn't manually managed them)
@@ -739,7 +790,7 @@
       const platforms = section.querySelectorAll('[name="platforms"]:checked');
       if (platforms.length === 0) { errorDiv.textContent = '请选择至少一个销售平台'; errorDiv.style.display = 'block'; return false; }
       const rev = section.querySelector('[name="annual_revenue"]');
-      if (!rev.value) { rev.classList.add('field-error'); errorDiv.textContent = '请选择年销售额'; errorDiv.style.display = 'block'; return false; }
+      if (!rev.value.trim()) { rev.classList.add('field-error'); errorDiv.textContent = '请填写年销售额'; errorDiv.style.display = 'block'; return false; }
       const cats = section.querySelectorAll('[name="categories"]:checked');
       if (cats.length === 0) { errorDiv.textContent = '请选择至少一个产品类目'; errorDiv.style.display = 'block'; return false; }
     }
@@ -753,7 +804,15 @@
   function getChecked(name) { return Array.from(document.querySelectorAll('[name="'+name+'"]:checked')).map(c => c.value); }
   function getRadio(name) { const el = document.querySelector('[name="'+name+'"]:checked'); return el ? el.value : ''; }
   function buildSummary() {
-    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>手机/微信：'+getVal('phone_wechat')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+(getChecked('platforms').join('、')||'未选')+'<br>年销售额：'+getVal('annual_revenue')+'<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(getRadio('overseas_warehouse')||'未选')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
+    const isBrand = getRadio('is_brand');
+    const platforms = getChecked('platforms');
+    const platformsOther = getVal('platforms_other');
+    const platformsDisplay = platforms.map(p => p === '其他' && platformsOther ? '其他('+platformsOther+')' : p).join('、') || '未选';
+    const overseasWh = getRadio('overseas_warehouse');
+    const whRegions = getChecked('warehouse_regions');
+    const whOther = getVal('warehouse_regions_other');
+    const whRegionsDisplay = whRegions.map(r => r === '其他' && whOther ? '其他('+whOther+')' : r).join('、');
+    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>手机/微信：'+getVal('phone_wechat')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' 万元<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
     document.getElementById('summaryContent').innerHTML = html;
   }
   // ===== 提交逻辑（双保险版）=====
@@ -769,18 +828,25 @@
     btn.disabled = true;
     btn.textContent = '提交中...';
     const data = {
-      company_name: getVal('company_name'), contact_name: getVal('contact_name'), contact_title: getVal('contact_title'),
+      company_name: getVal('company_name'), cd_store_name: getVal('cd_store_name'),
+      is_brand: getRadio('is_brand'), brand_name: getVal('brand_name'),
+      contact_name: getVal('contact_name'), contact_title: getVal('contact_title'),
       phone_wechat: getVal('phone_wechat'), email: getVal('email'), website: getVal('website'),
       comm_method: getChecked('comm_method').join(', '), experience_years: getVal('experience_years'),
       has_cdiscount_store: getRadio('has_cdiscount_store'), cdiscount_store_id: getVal('cdiscount_store_id'),
-      platforms: getChecked('platforms').join(', '), annual_revenue: getVal('annual_revenue'),
+      platforms: getChecked('platforms').join(', '), platforms_other: getVal('platforms_other'),
+      platform_store_urls: getVal('platform_store_urls'),
+      annual_revenue: getVal('annual_revenue'),
       strategy: getVal('strategy'), categories: getChecked('categories').join(', '),
       sku_count: getVal('sku_count'), pricing_strategy: getVal('pricing_strategy'),
       warehouse_location: getVal('warehouse_location'), logistics_partner: getVal('logistics_partner'),
-      overseas_warehouse: getRadio('overseas_warehouse'), shipping_methods: getChecked('shipping_methods').join(', '),
+      overseas_warehouse: getRadio('overseas_warehouse'),
+      warehouse_regions: getChecked('warehouse_regions').join(', '),
+      warehouse_regions_other: getVal('warehouse_regions_other'),
+      shipping_methods: getChecked('shipping_methods').join(', '),
       onboarding_pref: getRadio('onboarding_pref'), interested_services: getChecked('interested_services').join(', '),
       planned_time: getVal('planned_time'), notes: getVal('notes'),
-      submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v2'
+      submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v3'
     };
     // 8 秒超时
     const controller = new AbortController();
