@@ -423,13 +423,17 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>手机 / 微信 <span class="req">*</span></label>
-          <input type="text" name="phone_wechat" placeholder="手机号码（同微信优先）" required>
+          <label>电话 <span class="req">*</span></label>
+          <input type="text" name="phone" placeholder="手机号码（带国际区号，例 +86 138...）" required>
         </div>
         <div class="form-group">
-          <label>邮箱 <span class="req">*</span></label>
-          <input type="email" name="email" placeholder="your@company.com" required>
+          <label>微信号 <span class="req">*</span></label>
+          <input type="text" name="wechat_id" placeholder="微信号 / WeChat ID" required>
         </div>
+      </div>
+      <div class="form-group">
+        <label>邮箱 <span class="req">*</span></label>
+        <input type="email" name="email" placeholder="your@company.com" required>
       </div>
       <div class="form-group">
         <label>官网 <span class="hint">（如有）</span></label>
@@ -688,8 +692,12 @@
       cb.closest('.chip').classList.add('selected');
     }
   }
-  const phoneInput = document.querySelector('[name="phone_wechat"]');
+  const phoneInput = document.querySelector('[name="phone"]');
   if (phoneInput) phoneInput.addEventListener('input', function() {
+    if (this.value.trim()) autoTickChip('电话');
+  });
+  const wechatInput = document.querySelector('[name="wechat_id"]');
+  if (wechatInput) wechatInput.addEventListener('input', function() {
     if (this.value.trim()) autoTickChip('微信');
   });
   const emailInput = document.querySelector('[name="email"]');
@@ -754,7 +762,7 @@
     if (errorDiv) errorDiv.style.display = 'none';
     section.querySelectorAll('.field-error').forEach(f => f.classList.remove('field-error'));
     if (step === 1) {
-      const required = ['company_name', 'cd_store_name', 'contact_name', 'phone_wechat', 'email'];
+      const required = ['company_name', 'cd_store_name', 'contact_name', 'phone', 'wechat_id', 'email'];
       for (const name of required) {
         const input = section.querySelector('[name="'+name+'"]');
         if (!input.value.trim()) {
@@ -772,9 +780,14 @@
       // Auto-tick communication method chips based on filled contact fields (only if user hasn't manually managed them)
       let comm = section.querySelectorAll('[name="comm_method"]:checked');
       if (comm.length === 0 && !commManuallyEdited) {
-        const phoneVal = section.querySelector('[name="phone_wechat"]').value.trim();
+        const phoneVal = section.querySelector('[name="phone"]').value.trim();
+        const wechatVal = section.querySelector('[name="wechat_id"]').value.trim();
         const emailVal = section.querySelector('[name="email"]').value.trim();
         if (phoneVal) {
+          const phoneChip = section.querySelector('[name="comm_method"][value="电话"]');
+          if (phoneChip) { phoneChip.checked = true; phoneChip.closest('.chip').classList.add('selected'); }
+        }
+        if (wechatVal) {
           const wechatChip = section.querySelector('[name="comm_method"][value="微信"]');
           if (wechatChip) { wechatChip.checked = true; wechatChip.closest('.chip').classList.add('selected'); }
         }
@@ -812,7 +825,7 @@
     const whRegions = getChecked('warehouse_regions');
     const whOther = getVal('warehouse_regions_other');
     const whRegionsDisplay = whRegions.map(r => r === '其他' && whOther ? '其他('+whOther+')' : r).join('、');
-    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>手机/微信：'+getVal('phone_wechat')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' €<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
+    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>电话：'+getVal('phone')+'<br>微信号：'+getVal('wechat_id')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' €<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
     document.getElementById('summaryContent').innerHTML = html;
   }
   // ===== 提交逻辑（双保险版）=====
@@ -831,7 +844,7 @@
       company_name: getVal('company_name'), cd_store_name: getVal('cd_store_name'),
       is_brand: getRadio('is_brand'), brand_name: getVal('brand_name'),
       contact_name: getVal('contact_name'), contact_title: getVal('contact_title'),
-      phone_wechat: getVal('phone_wechat'), email: getVal('email'), website: getVal('website'),
+      phone: getVal('phone'), wechat_id: getVal('wechat_id'), email: getVal('email'), website: getVal('website'),
       comm_method: getChecked('comm_method').join(', '), experience_years: getVal('experience_years'),
       has_cdiscount_store: getRadio('has_cdiscount_store'), cdiscount_store_id: getVal('cdiscount_store_id'),
       platforms: getChecked('platforms').join(', '), platforms_other: getVal('platforms_other'),
