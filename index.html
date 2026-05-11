@@ -828,10 +828,10 @@
     const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>电话：'+getVal('phone')+'<br>微信号：'+getVal('wechat_id')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' €<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
     document.getElementById('summaryContent').innerHTML = html;
   }
-  // ===== 提交逻辑（双保险版）=====
-  // 1. 同时绑定 form submit + button click，任何一个触发都能提交
-  // 2. 8 秒超时，避免 N8N 慢导致永远卡在「提交中」
-  // 3. 不管 N8N 成不成功都显示成功页（数据错误从控制台看）
+  // ===== 提交逻辑 =====
+  // 1. 同时绑定 form submit + button click
+  // 2. 12 秒超时
+  // 3. 必须收到 worker {ok:true} 才显示成功页；任何异常都显示错误
   // 4. 防止重复点击
   let submitting = false;
   async function submitFormData() {
@@ -861,9 +861,11 @@
       planned_time: getVal('planned_time'), notes: getVal('notes'),
       submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v3'
     };
-    // 8 秒超时
+    // 12 秒超时
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    let ok = false;
+    let errMsg = '';
     try {
       const resp = await fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
@@ -872,14 +874,40 @@
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      console.log('N8N 响应状态:', resp.status);
+      const body = await resp.json().catch(() => ({}));
+      if (resp.ok && body.ok === true) {
+        ok = true;
+      } else {
+        errMsg = body.error || ('HTTP ' + resp.status);
+        console.log('提交失败:', errMsg, body);
+      }
     } catch (err) {
       clearTimeout(timeoutId);
-      console.log('提交异常:', err.message);
+      errMsg = err.name === 'AbortError' ? '请求超时（12秒）' : err.message;
+      console.log('提交异常:', errMsg);
       console.log('提交数据:', JSON.stringify(data, null, 2));
     }
-    showSuccess();
+    if (ok) {
+      showSuccess();
+    } else {
+      showSubmitError(errMsg);
+    }
     submitting = false;
+  }
+  function showSubmitError(msg) {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = false;
+    btn.textContent = '🚀 重新提交';
+    let box = document.getElementById('submitErrorBox');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'submitErrorBox';
+      box.style.cssText = 'margin:16px 0;padding:14px 18px;background:#fef2f2;border:1.5px solid #ef4444;border-radius:8px;color:#b91c1c;font-size:14px;line-height:1.6;';
+      btn.parentNode.parentNode.insertBefore(box, btn.parentNode);
+    }
+    box.innerHTML = '⚠️ 提交未成功：' + (msg || '网络异常') +
+      '<br>请<b>检查网络</b>后再次点击「重新提交」。若多次失败，请截图本页面联系招商经理微信。';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   // 主：按钮点击
   document.getElementById('submitBtn').addEventListener('click', function(e) {
