@@ -538,6 +538,10 @@
           <label class="chip"><input type="checkbox" name="categories" value="箱包"> 箱包</label>
           <label class="chip"><input type="checkbox" name="categories" value="其他"> 其他</label>
         </div>
+        <div class="conditional" id="categoriesOtherField" style="margin-top:10px">
+          <label>其他类目 <span class="hint">（请填写您具体销售的细分类目）</span></label>
+          <input type="text" name="categories_other" placeholder="例：宠物用品、户外露营、汽车清洁、小家电配件">
+        </div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -743,6 +747,14 @@
       }
     });
   });
+  // 产品类目勾选「其他」展开自填输入框
+  document.querySelectorAll('#categoryGroup input[name="categories"]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      if (this.value === '其他') {
+        document.getElementById('categoriesOtherField').classList.toggle('show', this.checked);
+      }
+    });
+  });
   function goStep(step) {
     if (step > currentStep && !validateStep(currentStep)) return;
     if (step === 4) buildSummary();
@@ -826,7 +838,10 @@
     const whRegions = getChecked('warehouse_regions');
     const whOther = getVal('warehouse_regions_other');
     const whRegionsDisplay = whRegions.map(r => r === '其他' && whOther ? '其他('+whOther+')' : r).join('、');
-    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>电话：'+getVal('phone')+'<br>微信号：'+getVal('wechat_id')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' €<br>产品类目：'+(getChecked('categories').join('、')||'未选')+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
+    const cats = getChecked('categories');
+    const catsOther = getVal('categories_other');
+    const catsDisplay = cats.map(c => c === '其他' && catsOther ? '其他('+catsOther+')' : c).join('、') || '未选';
+    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>电话：'+getVal('phone')+'<br>微信号：'+getVal('wechat_id')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' €<br>产品类目：'+catsDisplay+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
     document.getElementById('summaryContent').innerHTML = html;
   }
   // ===== 提交逻辑 =====
@@ -851,7 +866,7 @@
       platforms: getChecked('platforms').join(', '), platforms_other: getVal('platforms_other'),
       platform_store_urls: getVal('platform_store_urls'),
       annual_revenue: getVal('annual_revenue'),
-      strategy: getVal('strategy'), categories: getChecked('categories').join(', '),
+      strategy: getVal('strategy'), categories: getChecked('categories').join(', '), categories_other: getVal('categories_other'),
       sku_count: getVal('sku_count'), pricing_strategy: getVal('pricing_strategy'),
       warehouse_location: getVal('warehouse_location'), logistics_partner: getVal('logistics_partner'),
       overseas_warehouse: getRadio('overseas_warehouse'),
