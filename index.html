@@ -666,7 +666,8 @@
   法国领先电商平台 · 中国卖家招商<br>
 </div>
 <script>
-  const N8N_WEBHOOK_URL = "https://cdiscount-form-relay.weilin-bellina-hu.workers.dev";
+  // 2026-05-12 切到 Vercel：旧 workers.dev 国内被墙
+  const N8N_WEBHOOK_URL = "https://cdiscount-form-relay.vercel.app/";
   let currentStep = 1;
   // Chip 视觉同步：让浏览器原生的 label→input 切换工作，我们只听 change 事件更新视觉
   document.querySelectorAll('.chip').forEach(chip => {
@@ -830,7 +831,7 @@
   }
   // ===== 提交逻辑 =====
   // 1. 同时绑定 form submit + button click
-  // 2. 12 秒超时
+  // 2. 25 秒超时（Worker 同步路径 <3s，法语翻译走后台 waitUntil，不阻塞响应）
   // 3. 必须收到 worker {ok:true} 才显示成功页；任何异常都显示错误
   // 4. 防止重复点击
   let submitting = false;
@@ -861,9 +862,9 @@
       planned_time: getVal('planned_time'), notes: getVal('notes'),
       submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v3'
     };
-    // 12 秒超时
+    // 25 秒超时（兜底；正常路径应在 1-3s 内返回）
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
     let ok = false;
     let errMsg = '';
     try {
@@ -883,7 +884,7 @@
       }
     } catch (err) {
       clearTimeout(timeoutId);
-      errMsg = err.name === 'AbortError' ? '请求超时（12秒）' : err.message;
+      errMsg = err.name === 'AbortError' ? '请求超时（25秒）' : err.message;
       console.log('提交异常:', errMsg);
       console.log('提交数据:', JSON.stringify(data, null, 2));
     }
