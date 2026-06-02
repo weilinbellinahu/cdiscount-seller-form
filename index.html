@@ -846,7 +846,7 @@
   }
   // ===== 提交逻辑 =====
   // 1. 同时绑定 form submit + button click
-  // 2. 25 秒超时（Worker 同步路径 <3s，法语翻译走后台 waitUntil，不阻塞响应）
+  // 2. 60 秒超时（Vercel 同步路径 <3s，法语翻译走 waitUntil 不阻塞；超时仅兜底国内慢网）
   // 3. 必须收到 worker {ok:true} 才显示成功页；任何异常都显示错误
   // 4. 防止重复点击
   let submitting = false;
@@ -877,9 +877,9 @@
       planned_time: getVal('planned_time'), notes: getVal('notes'),
       submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v3'
     };
-    // 25 秒超时（兜底；正常路径应在 1-3s 内返回）
+    // 60 秒超时（兜底；正常路径应在 1-3s 内返回，留足国内慢网余量）
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
     let ok = false;
     let errMsg = '';
     try {
@@ -899,7 +899,7 @@
       }
     } catch (err) {
       clearTimeout(timeoutId);
-      errMsg = err.name === 'AbortError' ? '请求超时（25秒）' : err.message;
+      errMsg = err.name === 'AbortError' ? '请求超时（60秒）' : err.message;
       console.log('提交异常:', errMsg);
       console.log('提交数据:', JSON.stringify(data, null, 2));
     }
