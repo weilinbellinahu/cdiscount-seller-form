@@ -670,8 +670,8 @@
   法国领先电商平台 · 中国卖家招商<br>
 </div>
 <script>
-  // 2026-05-12 切到 Vercel：旧 workers.dev 国内被墙
-  const N8N_WEBHOOK_URL = "https://cdiscount-form-relay.vercel.app/";
+  // 2026-06-11 切到自有域名：*.vercel.app 国内 DNS 被污染
+  const N8N_WEBHOOK_URL = "https://form-relay.weilinhu.com/";
   let currentStep = 1;
   // Chip 视觉同步：让浏览器原生的 label→input 切换工作，我们只听 change 事件更新视觉
   document.querySelectorAll('.chip').forEach(chip => {
