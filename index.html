@@ -342,6 +342,85 @@
     font-size: 13px;
     border: 1px solid #fecaca;
   }
+  /* GMV 截图上传区 */
+  .gmv-upload {
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 20px;
+    background: #f8fafc;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gmv-upload:hover { border-color: #F5A623; background: #fff7ed; }
+  .gmv-upload.dragover { border-color: #F5A623; background: #fff7ed; transform: scale(1.01); }
+  .gmv-upload .icon { font-size: 32px; margin-bottom: 8px; }
+  .gmv-upload .main-text { font-size: 14px; color: #1B2A4A; font-weight: 600; margin-bottom: 4px; }
+  .gmv-upload .sub-text { font-size: 12px; color: #64748b; line-height: 1.6; }
+  .gmv-upload input[type="file"] { display: none; }
+  .gmv-thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .gmv-thumb {
+    position: relative;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    aspect-ratio: 4/3;
+  }
+  .gmv-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .gmv-thumb .progress {
+    position: absolute; inset: 0;
+    background: rgba(27,42,74,0.85);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .gmv-thumb .progress .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gmv-thumb .delete-btn {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: rgba(239,68,68,0.95);
+    color: white;
+    border: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .gmv-thumb .delete-btn:hover { background: #dc2626; }
+  .gmv-thumb .err-badge {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #ef4444;
+    color: white;
+    font-size: 11px;
+    padding: 4px;
+    text-align: center;
+  }
+  .gmv-privacy {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+    background: #ecfdf5;
+    border-left: 3px solid #10b981;
+    padding: 8px 12px;
+    border-radius: 4px;
+  }
   @media (max-width: 640px) {
     .header-inner { padding: 28px 20px 24px; }
     .header h1 { font-size: 22px; }
@@ -522,6 +601,17 @@
         </div>
       </div>
       <div class="form-group">
+        <label>店铺后台 GMV 截图 <span class="hint">（选填 · 强烈建议，可大幅提高审核优先级）</span></label>
+        <div class="gmv-upload" id="gmvUploadBox">
+          <input type="file" id="gmvFileInput" accept="image/png,image/jpeg,image/jpg,image/webp" multiple>
+          <div class="icon">📊</div>
+          <div class="main-text">点击或拖拽图片到此处上传</div>
+          <div class="sub-text">店铺后台 GMV、商品销量、订单数等截图 · 最多 5 张 · 单张 ≤3MB · PNG/JPG/WEBP</div>
+        </div>
+        <div class="gmv-thumbs" id="gmvThumbs"></div>
+        <div class="gmv-privacy">🔒 隐私承诺：截图仅 Cdiscount 招商经理可见，不会公开传播，仅用于审核您的入驻资质。</div>
+      </div>
+      <div class="form-group">
         <label>产品类目 <span class="req">*</span> <span class="hint">（可多选）</span></label>
         <div class="chip-group" id="categoryGroup">
           <label class="chip"><input type="checkbox" name="categories" value="家居"> 家居</label>
@@ -672,6 +762,106 @@
 <script>
   // 2026-06-11 切到自有域名：*.vercel.app 国内 DNS 被污染
   const N8N_WEBHOOK_URL = "https://form-relay.weilinhu.com/";
+  // GMV 截图走自家 Vercel 代理 → catbox.moe（无需 key、国内域名畅通）
+  const GMV_UPLOAD_URL = "https://form-relay.weilinhu.com/api/upload";
+  const GMV_MAX_FILES = 5;
+  const GMV_MAX_SIZE = 3 * 1024 * 1024; // 3MB（base64 后 ~4MB，Vercel body 限制 4.5MB）
+  // 上传状态：[{id, name, url, status: 'uploading'|'done'|'error', errMsg}]
+  const gmvFiles = [];
+
+  function gmvRender() {
+    const box = document.getElementById('gmvThumbs');
+    if (gmvFiles.length === 0) { box.innerHTML = ''; return; }
+    box.innerHTML = gmvFiles.map(f => {
+      const overlay = f.status === 'uploading'
+        ? '<div class="progress"><div class="spinner"></div><div>上传中...</div></div>'
+        : '';
+      const err = f.status === 'error'
+        ? '<div class="err-badge">上传失败 · 请重试</div>'
+        : '';
+      const img = f.preview
+        ? '<img src="'+f.preview+'" alt="">'
+        : '';
+      return '<div class="gmv-thumb" data-id="'+f.id+'">' + img + overlay + err +
+        '<button type="button" class="delete-btn" onclick="gmvRemove(\''+f.id+'\')" title="删除">×</button></div>';
+    }).join('');
+  }
+  function gmvRemove(id) {
+    const idx = gmvFiles.findIndex(f => f.id === id);
+    if (idx >= 0) gmvFiles.splice(idx, 1);
+    gmvRender();
+  }
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('读取文件失败'));
+      reader.readAsDataURL(file);
+    });
+  }
+  async function gmvUploadOne(item, file) {
+    try {
+      const b64 = await fileToBase64(file);
+      const resp = await fetch(GMV_UPLOAD_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_base64: b64, filename: file.name })
+      });
+      const j = await resp.json().catch(() => ({}));
+      if (resp.ok && j.ok && j.url) {
+        item.url = j.url;
+        item.status = 'done';
+      } else {
+        item.status = 'error';
+        item.errMsg = j.error || ('HTTP ' + resp.status);
+      }
+    } catch (e) {
+      item.status = 'error';
+      item.errMsg = e.message;
+    }
+    gmvRender();
+  }
+  function gmvHandleFiles(fileList) {
+    const slots = GMV_MAX_FILES - gmvFiles.length;
+    if (slots <= 0) { alert('最多只能上传 ' + GMV_MAX_FILES + ' 张'); return; }
+    const accepted = Array.from(fileList).slice(0, slots);
+    for (const file of accepted) {
+      if (!/^image\//.test(file.type)) continue;
+      if (file.size > GMV_MAX_SIZE) {
+        alert('「' + file.name + '」超过 3MB，请压缩后再上传');
+        continue;
+      }
+      const item = {
+        id: 'gmv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        name: file.name, status: 'uploading', preview: '', url: ''
+      };
+      const reader = new FileReader();
+      reader.onload = (e) => { item.preview = e.target.result; gmvRender(); };
+      reader.readAsDataURL(file);
+      gmvFiles.push(item);
+      gmvUploadOne(item, file);
+    }
+    gmvRender();
+  }
+  // 绑定：点击 + 拖拽
+  (function bindGmv() {
+    const box = document.getElementById('gmvUploadBox');
+    const input = document.getElementById('gmvFileInput');
+    if (!box || !input) return;
+    box.addEventListener('click', () => input.click());
+    input.addEventListener('change', (e) => {
+      gmvHandleFiles(e.target.files);
+      input.value = '';
+    });
+    box.addEventListener('dragover', (e) => {
+      e.preventDefault(); box.classList.add('dragover');
+    });
+    box.addEventListener('dragleave', () => box.classList.remove('dragover'));
+    box.addEventListener('drop', (e) => {
+      e.preventDefault(); box.classList.remove('dragover');
+      gmvHandleFiles(e.dataTransfer.files);
+    });
+  })();
   let currentStep = 1;
   // Chip 视觉同步：让浏览器原生的 label→input 切换工作，我们只听 change 事件更新视觉
   document.querySelectorAll('.chip').forEach(chip => {
@@ -841,7 +1031,7 @@
     const cats = getChecked('categories');
     const catsOther = getVal('categories_other');
     const catsDisplay = cats.map(c => c === '其他' && catsOther ? '其他('+catsOther+')' : c).join('、') || '未选';
-    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>电话：'+getVal('phone')+'<br>微信号：'+getVal('wechat_id')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' €<br>产品类目：'+catsDisplay+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
+    const html = '<div style="margin-bottom:16px"><strong style="color:#1B2A4A">🏢 公司信息</strong><br>公司：'+getVal('company_name')+'<br>入驻 CD 店铺名：'+getVal('cd_store_name')+'<br>是否品牌方：'+(isBrand||'未选')+(isBrand==='是'&&getVal('brand_name')?'（'+getVal('brand_name')+'）':'')+'<br>联系人：'+getVal('contact_name')+'（'+(getVal('contact_title')||'未填')+'）<br>电话：'+getVal('phone')+'<br>微信号：'+getVal('wechat_id')+'<br>邮箱：'+getVal('email')+'<br>跨境经验：'+getVal('experience_years')+'<br>'+(getRadio('has_cdiscount_store')==='是'?'Cdiscount店铺号：'+getVal('cdiscount_store_id')+'<br>':'')+'</div><div style="margin-bottom:16px"><strong style="color:#1B2A4A">📦 销售与产品</strong><br>销售平台：'+platformsDisplay+'<br>'+(getVal('platform_store_urls')?'店铺地址：<br><span style="white-space:pre-wrap;color:#475569">'+getVal('platform_store_urls')+'</span><br>':'')+'年销售额：'+getVal('annual_revenue')+' €<br>GMV 截图：'+(gmvFiles.filter(f=>f.status==='done').length || '未上传')+(gmvFiles.filter(f=>f.status==='done').length?' 张':'')+'<br>产品类目：'+catsDisplay+'<br>SKU数量：'+(getVal('sku_count')||'未填')+'<br></div><div><strong style="color:#1B2A4A">🚚 物流与服务</strong><br>海外仓：'+(overseasWh||'未选')+(overseasWh==='已布局'&&whRegionsDisplay?'（'+whRegionsDisplay+'）':'')+'<br>配送方式：'+(getChecked('shipping_methods').join('、')||'未选')+'<br>感兴趣服务：'+(getChecked('interested_services').join('、')||'未选')+'<br>计划入驻：'+(getVal('planned_time')||'未选')+'<br></div>';
     document.getElementById('summaryContent').innerHTML = html;
   }
   // ===== 提交逻辑 =====
@@ -852,6 +1042,12 @@
   let submitting = false;
   async function submitFormData() {
     if (submitting) return;
+    // 拦截：GMV 截图仍在上传时不允许提交
+    const uploading = gmvFiles.filter(f => f.status === 'uploading');
+    if (uploading.length > 0) {
+      alert('店铺后台 GMV 截图还在上传中（' + uploading.length + ' 张），请稍候再点提交');
+      return;
+    }
     submitting = true;
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
@@ -875,6 +1071,7 @@
       shipping_methods: getChecked('shipping_methods').join(', '),
       onboarding_pref: getRadio('onboarding_pref'), interested_services: getChecked('interested_services').join(', '),
       planned_time: getVal('planned_time'), notes: getVal('notes'),
+      gmv_screenshots: gmvFiles.filter(f => f.status === 'done' && f.url).map(f => f.url),
       submitted_at: new Date().toISOString(), form_source: 'cdiscount_seller_form_v3'
     };
     // 60 秒超时（兜底；正常路径应在 1-3s 内返回，留足国内慢网余量）
